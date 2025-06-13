@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Entrenador de Raíz Cuadrada</title>
+  <style>
+    /* Estilos generales para el cuerpo del documento */
+    body { 
+      font-family: Arial, sans-serif; 
+      text-align: center; 
+      margin-top: 50px; 
+    }
+    
+    /* Estilos para inputs y botones con tamaño de fuente aumentado */
+    input, button { 
+      font-size: 1.2em; 
+      margin: 10px; 
+    }
+    
+    /* Estilo para el mensaje de retroalimentación */
+    .feedback { 
+      font-weight: bold; 
+      margin-top: 20px; 
+    }
+    
+    /* Estilos para la sección del historial */
+    .history-section {
+      margin-top: 30px;
+      padding: 20px;
+      background-color: #f5f5f5;
+      border-radius: 10px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    /* Estilos para la lista del historial */
+    .history-list {
+      list-style: none;
+      padding: 0;
+      text-align: left;
+    }
+    
+    /* Estilos para cada item del historial */
+    .history-item {
+      padding: 5px 10px;
+      margin: 5px 0;
+      border-radius: 5px;
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    /* Estilo para resultados correctos */
+    .correct {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    
+    /* Estilo para resultados incorrectos */
+    .incorrect {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+  </style>
+</head>
+<body>
+  <!-- Título principal de la aplicación -->
+  <h1>Entrenador de Raíz Cuadrada</h1>
+  
+  <!-- Contenedor para mostrar la pregunta -->
+  <div>
+    <span>¿Cuál es la raíz cuadrada de </span>
+    <!-- Aquí se mostrará el número aleatorio generado -->
+    <span id="randomNumber"></span>
+    <span>?</span>
+  </div>
+  
+  <!-- Campo de entrada para la respuesta del usuario -->
+  <input type="number" id="userAnswer" step="any" placeholder="Tu respuesta">
+  
+  <!-- Botón para verificar la respuesta -->
+  <button onclick="checkAnswer()">Comprobar</button>
+  
+  <!-- Div para mostrar mensajes de correcto/incorrecto -->
+  <div class="feedback" id="feedback"></div>
+  
+  <!-- Botón para generar una nueva pregunta -->
+  <button onclick="nextQuestion()">Siguiente</button>
+  
+  <!-- Sección del historial -->
+  <div class="history-section">
+    <h2>Historial (últimos 10 resultados)</h2>
+    <ul class="history-list" id="historyList"></ul>
+  </div>
+
+  <script>
+    // Variable global para almacenar el número actual de la pregunta
+    let currentNumber = 0;
+    // Array para almacenar el historial de resultados
+    let history = [];
+
+    /**
+     * Genera un número cuadrado perfecto aleatorio
+     * @returns {number} Un cuadrado perfecto entre 1 y 400
+     */
+    function generateRandomNumber() {
+      // Genera un número aleatorio entre 1 y 20
+      const n = Math.floor(Math.random() * 20) + 1;
+      // Retorna el cuadrado del número (n²)
+      return n * n;
+    }
+
+    /**
+     * Genera una nueva pregunta:
+     * - Genera un nuevo número aleatorio
+     * - Actualiza la interfaz mostrando el número
+     * - Limpia la respuesta anterior y el feedback
+     */
+    function nextQuestion() {
+      // Genera y almacena el nuevo número
+      currentNumber = generateRandomNumber();
+      // Muestra el número en la interfaz
+      document.getElementById('randomNumber').textContent = currentNumber;
+      // Limpia el campo de respuesta
+      document.getElementById('userAnswer').value = '';
+      // Limpia el mensaje de feedback
+      document.getElementById('feedback').textContent = '';
+    }
+
+    /**
+     * Verifica si la respuesta del usuario es correcta
+     * Compara la respuesta con la raíz cuadrada real del número
+     * Muestra feedback apropiado (correcto/incorrecto)
+     */
+    function checkAnswer() {
+      // Obtiene el valor ingresado por el usuario
+      const userValue = parseFloat(document.getElementById('userAnswer').value);
+      // Calcula la respuesta correcta
+      const correct = Math.sqrt(currentNumber);
+      
+      // Verifica si la respuesta es correcta (con tolerancia de 0.0001)
+      const isCorrect = Math.abs(userValue - correct) < 0.0001;
+      
+      if (isCorrect) {
+        // Muestra mensaje de éxito en verde
+        document.getElementById('feedback').textContent = '¡Correcto!';
+        document.getElementById('feedback').style.color = 'green';
+      } else {
+        // Muestra mensaje de error con la respuesta correcta en rojo
+        document.getElementById('feedback').textContent = `Incorrecto. La respuesta correcta es ${correct}`;
+        document.getElementById('feedback').style.color = 'red';
+      }
+      
+      // Agrega el resultado al historial
+      addToHistory(currentNumber, userValue, correct, isCorrect);
+    }
+
+    /**
+     * Agrega un resultado al historial
+     * @param {number} question - El número de la pregunta
+     * @param {number} userAnswer - La respuesta del usuario
+     * @param {number} correctAnswer - La respuesta correcta
+     * @param {boolean} isCorrect - Si la respuesta fue correcta
+     */
+    function addToHistory(question, userAnswer, correctAnswer, isCorrect) {
+      // Crea un objeto con los datos del intento
+      const attempt = {
+        question: question,
+        userAnswer: userAnswer,
+        correctAnswer: correctAnswer,
+        isCorrect: isCorrect,
+        timestamp: new Date()
+      };
+      
+      // Agrega al principio del array
+      history.unshift(attempt);
+      
+      // Mantiene solo los últimos 10 resultados
+      if (history.length > 10) {
+        history.pop();
+      }
+      
+      // Actualiza la visualización del historial
+      updateHistoryDisplay();
+    }
+
+    /**
+     * Actualiza la visualización del historial en la interfaz
+     */
+    function updateHistoryDisplay() {
+      const historyList = document.getElementById('historyList');
+      // Limpia el contenido actual
+      historyList.innerHTML = '';
+      
+      // Crea un elemento de lista para cada intento en el historial
+      history.forEach((attempt, index) => {
+        const listItem = document.createElement('li');
+        listItem.className = `history-item ${attempt.isCorrect ? 'correct' : 'incorrect'}`;
+        
+        // Formatea el contenido del item
+        const attemptText = `√${attempt.question} = ${attempt.userAnswer}`;
+        const resultText = attempt.isCorrect ? '✓' : `✗ (correcta: ${attempt.correctAnswer})`;
+        
+        listItem.innerHTML = `
+          <span>${attemptText}</span>
+          <span>${resultText}</span>
+        `;
+        
+        historyList.appendChild(listItem);
+      });
+    }
+
+    // Inicializa la aplicación con la primera pregunta al cargar la página
+    nextQuestion();
+  </script>
+</body>
+</html>
