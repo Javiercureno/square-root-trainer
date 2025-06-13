@@ -80,7 +80,7 @@ Este proyecto está bajo licencia MIT. Ver el archivo `LICENSE` para más detall
 
 **Tu Nombre**
 
-- GitHub: [@tu-usuario](https://github.com/tu-usuario)
+- GitHub: (https://github.com/Javiercureno)
 
 ---
 
